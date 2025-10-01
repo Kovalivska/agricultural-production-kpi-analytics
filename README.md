@@ -109,6 +109,58 @@ Das Herzstück des Projekts bildet ein **hierarchisches KPI-System** mit folgend
 ### 2. **Python & SQL Implementation** 
 Vollständige Code-Implementierung für KPI-Berechnung und Visualisierung:
 
+#### **42 Vollständig Implementierte KPIs:**
+
+**Operative Steuerung (1-15):**
+1. Befüllzeit eines Containers (Sek/Min)
+2. Abweichung vom Zielgewicht (g)
+3. Anzahl befüllter Container pro Schicht
+4. Anzahl Einheiten pro Container
+5. Durchschnittliches Stückgewicht im Container (g)
+6. Zeitabstand zwischen Einheiten im Container (Sek)
+7. Zeit zwischen Containerbefüllungen (Min)
+8. Durchschnittlicher Leerlauf pro Schicht (Min)
+9. Minimales Stückgewicht im Container (g)
+10. Maximales Stückgewicht im Container (g)
+11. Durchschnittliches Stückgewicht im Container (g)
+12. Gesamtanzahl der Einheiten pro Schicht
+13. Gesamtanzahl der Container pro Schicht
+14. Gesamtgewicht der produzierten Ware pro Schicht (kg)
+15. Produktivität pro Einheit (Einheiten/h)
+
+**Produktionseffizienz (16-27):**
+16. Produktivität pro Gewicht (kg/h)
+17. Abfallmenge (kg)
+18. Verlust in der Verarbeitung (%)
+19. Sortierqualität (%)
+20. Gewichtsstreuung bei Einheiten (Standardabweichung)
+21. Kosten pro Stück (€/Stück)
+22. Kosten pro kg (€/kg)
+23. Produktionsverlust in kg
+24. Produktionsverlust in %
+25. Abweichung zum Soll-Verlust (kg)
+26. Ø Zeit pro Palette (Min/Palette)
+27. Ø Kosten pro Palette (€/Palette)
+
+**Personal & Kosten (28-39):**
+28. Ø Mitarbeiterkosten pro Stunde (€/h)
+29. Stunden pro Schicht
+30. Anzahl Mitarbeiter pro Schicht
+31. Personalkosten pro Schicht (€)
+32. Rohware pro Palette (kg)
+33. IST pro Palette (kg)
+34. Verlust pro Palette (kg)
+35. Kosten pro Produktart (€/kg oder €/Stück)
+36. Effizienz pro Mitarbeiter (Stück/h oder kg/h)
+37. Leistungsvergleich Früh/Spät (Differenz)
+38. Ø Bearbeitungszeit pro Artikel (Min/Artikel)
+39. Qualitätsindikation pro Charge
+
+**OEE-Kennzahlen (40-42):**
+40. Verfügbarkeit/Availability (%)
+41. Leistung/Performance (%)
+42. Qualitätsrate/Quality (%)
+
 #### Python-Algorithmen:
 - **Hybrid-Algorithmus** für Gewichtsstabilitätserkennung
 - **Delta-Analyse** für präzise Stückzählung

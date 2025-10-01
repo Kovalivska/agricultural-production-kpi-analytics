@@ -55,7 +55,7 @@
 
 ![Database Architecture](src/DBv2.png)
 
-## 🚀 Getting Started
+##  Getting Started
 
 ### 📋 Prerequisites
 ```bash
@@ -66,33 +66,44 @@ python --version
 pip install pandas numpy matplotlib seaborn scipy plotly jupyter sqlite3
 ```
 
-### ⚡ Quick Start
+###  Quick Start
 ```bash
 # Clone repository
 git clone https://github.com/Kovalivska/agricultural-production-kpi-analytics.git
 cd agricultural-production-kpi-analytics
 
-# Open main analysis notebook
+#  MAIN ANALYSIS NOTEBOOK - The Heart of the Project
 jupyter notebook notebooks/KPIs_real_data.ipynb
 
 # Open dashboard in browser
 open src/New_DBv1_complete.html
 ```
 
-### 🔗 Dashboard Links
+###  **MAIN ANALYSIS: KPIs_real_data.ipynb**
+> **The most important document of this project** - 139 cells with complete implementation of all 42 KPIs
+
+📊 **Implemented KPI Categories:**
+- **Operational Control** (15 KPIs): Fill times, deviations, container management
+- **Production Efficiency** (12 KPIs): Throughput, productivity, time management  
+- **Quality Control** (8 KPIs): Weight distribution, sorting quality, error detection
+- **Cost Analysis** (7 KPIs): Cost per piece/kg, personnel costs, ROI calculation
+
+**💡 Direct link to Main Notebook:** [notebooks/KPIs_real_data.ipynb](notebooks/KPIs_real_data.ipynb)
+
+###  Dashboard Links
 - **🏭 VeggiePro Dashboard**: [src/prozessbasierte_Datenbank.html](src/prozessbasierte_Datenbank.html)
 - **📈 Analytics Dashboard**: [src/New_DBv1_complete.html](src/New_DBv1_complete.html)
 - **🗄️ Database Schema**: [src/DBv2.png](src/DBv2.png)
 
 ---
 
-## 🎯 Project Overview
+##  Project Overview
 
 This project represents a comprehensive **KPI Analytics System for Agricultural Production**, developed during an internship at **Data Coffee GmbH** (June 2025 - September 2025). The system implements over **40 Key Performance Indicators** for optimizing vegetable processing with focus on signal processing, time series analysis, and data-driven decision making.
 
-## 🏆 Main Project Results
+##  Main Project Results
 
-### 1. **KPI System and Pyramid Structure** 📊
+### 1. **KPI System and Pyramid Structure** 
 The core of the project forms a **hierarchical KPI system** with the following components:
 
 #### KPI Pyramid Architecture:
@@ -108,6 +119,58 @@ The core of the project forms a **hierarchical KPI system** with the following c
 
 ### 2. **Python & SQL Implementation** 🐍
 Complete code implementation for KPI calculation and visualization:
+
+#### **42 Fully Implemented KPIs:**
+
+**🔧 Operational Control (1-15):**
+1. Container Fill Time (Sec/Min)
+2. Target Weight Deviation (g)
+3. Number of Filled Containers per Shift
+4. Number of Units per Container
+5. Average Unit Weight in Container (g)
+6. Time Interval Between Units in Container (Sec)
+7. Time Between Container Fills (Min)
+8. Average Idle Time per Shift (Min)
+9. Minimum Unit Weight in Container (g)
+10. Maximum Unit Weight in Container (g)
+11. Average Unit Weight in Container (g)
+12. Total Number of Units per Shift
+13. Total Number of Containers per Shift
+14. Total Weight of Produced Goods per Shift (kg)
+15. Productivity per Unit (Units/h)
+
+**Production Efficiency (16-27):**
+16. Productivity per Weight (kg/h)
+17. Waste Amount (kg)
+18. Processing Loss (%)
+19. Sorting Quality (%)
+20. Weight Distribution of Units (Standard Deviation)
+21. Cost per Piece (€/Piece)
+22. Cost per kg (€/kg)
+23. Production Loss in kg
+24. Production Loss in %
+25. Deviation from Target Loss (kg)
+26. Avg Time per Pallet (Min/Pallet)
+27. Avg Cost per Pallet (€/Pallet)
+
+**Personnel & Costs (28-39):**
+28. Avg Employee Cost per Hour (€/h)
+29. Hours per Shift
+30. Number of Employees per Shift
+31. Personnel Costs per Shift (€)
+32. Raw Material per Pallet (kg)
+33. Actual per Pallet (kg)
+34. Loss per Pallet (kg)
+35. Cost per Product Type (€/kg or €/Piece)
+36. Efficiency per Employee (Pieces/h or kg/h)
+37. Performance Comparison Morning/Evening (Difference)
+38. Avg Processing Time per Article (Min/Article)
+39. Quality Indication per Batch
+
+**OEE Metrics (40-42):**
+40. Availability (%)
+41. Performance (%)
+42. Quality Rate (%)
 
 #### Python Algorithms:
 - **Hybrid Algorithm** for weight stability detection
