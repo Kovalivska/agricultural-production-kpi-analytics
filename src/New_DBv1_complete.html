@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+
+<html lang="de">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Gemüseverarbeitungs-Dashboard mit Details</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2/dist/tailwind.min.css" rel="stylesheet"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/luxon@3.0.4/build/global/luxon.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon@1.3.1"></script>
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet"/>
+<link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/style.css" rel="stylesheet"/>
+<style>
+        body, html { margin:0; padding:0; height:100%; background:#f3f4f6; }
+        header { position:relative; }
+        .tabs .tab { cursor:pointer; padding:0.5rem 1rem; background:#e5e7eb; border-radius:9999px; }
+        .tabs .tab-active { background:#4F46E5; color:white; }
+        .modal { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); display:none; align-items:flex-end; justify-content:flex-end; padding:1rem; z-index: 1000;}
+        .modal.open { display:flex; }
+        .modal > .content { background:white; border-radius:.5rem; width:90%; height:90%; overflow:auto; box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+        .kpi-card { background:white; border-radius:.5rem; box-shadow:0 1px 3px rgba(0,0,0,0.1); padding:1rem; display:flex; flex-direction:column; align-items:center; justify-content:center; cursor:pointer; }
+        .kpi-title { font-weight:600; font-size:1rem; margin-bottom:.5rem; }
+        .gauge { width:120px; height:60px; position:relative; margin-bottom:.5rem; }
+        .gauge canvas { position:absolute; top:0; left:0; width:100% !important; height:100% !important; }
+        .gauge .value { position:absolute; top:50%; left:50%; transform:translate(-50%,-40%); font-size:1.25rem; font-weight:bold; }
+        .content-tab { display: none; }
+        .content-tab.active { display: block; }
+        .week-summary-table th, .week-summary-table td { padding: 0.5rem; border-bottom: 1px solid #e5e7eb; text-align: left; }
+        .week-summary-table tr:last-child td { border-bottom: none; }
+        .unit-filter { display: flex; gap: 10px; align-items: center; }
+        .unit-option { padding: 5px 10px; border-radius: 20px; cursor: pointer; }
+        .unit-option.active { background-color: #4F46E5; color: white; }
+        .week-picker-container { display: flex; gap: 10px; align-items: center; }
+        .week-number { font-weight: bold; color: #4F46E5; }
+        .chart-title { text-align: center; margin-bottom: 1rem; }
+        .dashboard-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-top: 1rem; }
+        .dashboard-card { background: white; border-radius: 0.5rem; padding: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .dashboard-card canvas { width: 100% !important; height: 250px !important; }
+        .dashboard-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+        .dashboard-tab { padding: 0.5rem 1rem; background: #e5e7eb; border-radius: 0.25rem; cursor: pointer; }
+        .dashboard-tab.active { background: #4F46E5; color: white; }
+        .detail-chart-container { height: 300px; }
+        .back-button { background: #e5e7eb; border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; cursor: pointer; margin-bottom: 1rem; }
+        .back-button:hover { background: #d1d5db; }
+        .metric-summary { display: grid; grid-template-columns: repeat(5, 1fr); gap: 1rem; margin-bottom: 1rem; }
+        .metric-card { background: white; border-radius: 0.5rem; padding: 1rem; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .metric-value { font-size: 1.5rem; font-weight: bold; margin: 0.5rem 0; }
+        .metric-label { font-size: 0.875rem; color: #6b7280; }
+        .filter-container { display: flex; gap: 1rem; flex-wrap: wrap; align-items: center; }
+        .filter-section { display: flex; gap: 0.5rem; align-items: center; }
+        .shift-filter { display: flex; gap: 0.5rem; }
+        .shift-option { padding: 0.5rem 1rem; border-radius: 0.25rem; background: #e5e7eb; cursor: pointer; }
+        .shift-option.active { background: #4F46E5; color: white; }
+    </style>
+</head>
+<body class="flex flex-col h-full">
+<header class="bg-white shadow w-full">
+<div class="max-w-7xl mx-auto flex items-center justify-between py-4 px-6">
+<h1 class="text-2xl font-bold text-center flex-grow">Gemüseverarbeitungs Dashboard</h1>
+<div class="filter-container">
+<div class="unit-filter">
+<div class="text-sm font-medium">Einheit:</div>
+<div class="unit-option active" id="unit-kg">€/kg</div>
+<div class="unit-option" id="unit-piece">€/Stück</div>
+</div>
+<div class="filter-section">
+<div class="text-sm font-medium">Schicht:</div>
+<div class="shift-filter">
+<div class="shift-option active" data-shift="all">Alle</div>
+<div class="shift-option" data-shift="Früh">Früh</div>
+<div class="shift-option" data-shift="Spät">Spät</div>
+</div>
+</div>
+<div class="filter-section">
+<div class="text-sm font-medium">Artikel:</div>
+<select class="border rounded p-1" id="filter-article">
+<option value="all">Alle Artikel</option>
+<option value="ART-123">ART-123</option>
+<option value="ART-456">ART-456</option>
+<option value="ART-789">ART-789</option>
+</select>
+</div>
+<div id="date-picker-container">
+<div class="filter-section" id="day-date-filter">
+<input class="border rounded p-1" id="date-picker-day" type="date"/>
+</div>
+<div class="filter-section hidden" id="week-date-filter">
+<div class="week-picker-container">
+<input class="border rounded p-1" id="date-picker-week" type="week"/>
+<span class="text-sm">KW <span class="week-number" id="week-number"></span></span>
+</div>
+</div>
+<div class="filter-section hidden" id="month-date-filter">
+<input class="border rounded p-1" id="date-picker-month" type="month"/>
+</div>
+<div class="filter-section hidden" id="year-date-filter">
+<input class="border rounded p-1" id="date-picker-year" type="year"/>
+</div>
+</div>
+<div class="tabs flex space-x-2">
+<div class="tab tab-active" id="tab-day">Tag</div>
+<div class="tab" id="tab-week">Woche</div>
+<div class="tab" id="tab-month">Monat</div>
+<div class="tab" id="tab-year">Jahr</div>
+</div>
+</div>
+</div>
+</header>
+<main class="flex-1 overflow-auto p-6 space-y-6 w-full">
+<!-- Day Tab -->
+<div class="content-tab active" id="content-day">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+<!-- Belegschaft -->
+<div class="bg-white rounded-lg shadow p-6">
+<h2 class="font-semibold mb-2">Belegschaft</h2>
+<table class="w-full text-left text-sm table-auto">
+<thead>
+<tr>
+<th></th>
+<th>Früh</th>
+<th>Spät</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anzahl Mitarbeiter</td>
+<td>12</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Gesamte Personalkosten</td>
+<td>15€/h</td>
+<td>15€/h</td>
+</tr>
+<tr>
+<td>Anzahl Stunden gesamt</td>
+<td>11:45</td>
+<td>12:15</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Produkt -->
+<div class="bg-white rounded-lg shadow p-6">
+<h2 class="font-semibold mb-2">Produkt</h2>
+<table class="w-full text-left text-sm table-auto">
+<thead>
+<tr>
+<th></th>
+<th>Früh</th>
+<th>Spät</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anzahl Artikel</td>
+<td>ART-123, ART-125</td>
+<td>ART-123</td>
+</tr>
+<tr>
+<td>Artikel Name</td>
+<td>Weißkohl, Rotkohl</td>
+<td>Weißkohl</td>
+</tr>
+<tr>
+<td>Anzahl Produkte</td>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Erzeuger Rohware</td>
+<td>213€</td>
+<td>200€</td>
+</tr>
+<tr>
+<td>Anzahl Paletten SOLL gesamt</td>
+<td>1500 kg</td>
+<td>1500 kg</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Palette -->
+<div class="bg-white rounded-lg shadow p-6">
+<h2 class="font-semibold mb-2">Palette</h2>
+<table class="w-full text-left text-sm table-auto">
+<thead>
+<tr>
+<th></th>
+<th>Früh</th>
+<th>Spät</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Palettenanzahl</td>
+<td>24</td>
+<td>20</td>
+</tr>
+<tr>
+<td>Anzahl Paletten IST gesamt</td>
+<td>1543 kg</td>
+<td>1508 kg</td>
+</tr>
+<tr>
+<td>Rohware gesamt Gewicht</td>
+<td>1756 kg</td>
+<td>1720 kg</td>
+</tr>
+<tr>
+<td>Durchschnittszeit / Palette</td>
+<td>00:45</td>
+<td>00:50</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-5 gap-6 mt-6">
+<div class="kpi-card">
+<div class="kpi-title">Performance [%]</div>
+<div class="gauge"><canvas id="g1"></canvas><div class="value">68%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Verluste [%]</div>
+<div class="gauge"><canvas id="g2"></canvas><div class="value">5.2%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Kosten €/kg</div>
+<div class="gauge"><canvas id="g3"></canvas><div class="value">0.45€</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Produktivität kg/h</div>
+<div class="gauge"><canvas id="g4"></canvas><div class="value">480</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Qualität [gut / mittel / schlecht]</div>
+<div class="gauge">
+<canvas id="day-g5"></canvas>
+<div class="value">mittel</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Rohgewichtsmessungen im Zeitverlauf</h2>
+<canvas class="w-full h-60" id="chart-left"></canvas>
+</div>
+<div class="bg-white rounded-lg shadow p-4 flex flex-col justify-center items-center">
+<canvas class="w-full h-60 mb-4" id="chart-right"></canvas>
+<div class="text-sm text-gray-600 text-center">Hinweis: Beim Klicken auf eine KPI-Karte erscheint hier die entsprechende Visualisierung für Früh- vs. Spätschicht.</div>
+</div>
+</div>
+</div>
+<!-- Week Tab -->
+<div class="content-tab" id="content-week">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+<div class="kpi-card">
+<div class="kpi-title">Performance [%] (Ø)</div>
+<div class="gauge"><canvas id="week-g1"></canvas><div class="value">72%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Verluste [%] (Ø)</div>
+<div class="gauge"><canvas id="week-g2"></canvas><div class="value">4.8%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Kosten €/kg (Ø)</div>
+<div class="gauge"><canvas id="week-g3"></canvas><div class="value">0.42€</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Produktivität kg/h (Ø)</div>
+<div class="gauge"><canvas id="week-g4"></canvas><div class="value">510</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Qualität [gut / mittel / schlecht]</div>
+<div class="gauge">
+<canvas id="week-g5"></canvas>
+<div class="value">mittel</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="kpi-card">
+<div class="kpi-title">Max. Produktionstag</div>
+<div class="text-3xl font-bold mt-2">6.250 kg</div>
+<div class="text-sm mt-1">(Mittwoch, 04.06.2025)</div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Min. Performance-Tag</div>
+<div class="text-3xl font-bold mt-2">65%</div>
+<div class="text-sm mt-1">(Freitag, 06.06.2025)</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Kennzahlen im Wochenverlauf</h2>
+<canvas class="w-full h-72" id="week-chart-left"></canvas>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Mengenkennzahlen pro Tag</h2>
+<canvas class="w-full h-72" id="week-chart-right"></canvas>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-6 mt-6">
+<h2 class="font-semibold mb-4">Wochenzusammenfassung</h2>
+<table class="week-summary-table w-full">
+<thead>
+<tr class="bg-gray-50">
+<th>Kennzahl</th>
+<th>Wert</th>
+<th>Einheit</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Anzahl Paletten (gesamt)</td>
+<td class="font-medium">310</td>
+<td>Paletten</td>
+</tr>
+<tr>
+<td>Gesamtrohgewicht</td>
+<td class="font-medium">542.850</td>
+<td>kg</td>
+</tr>
+<tr>
+<td>Gesamtverlust</td>
+<td class="font-medium">26.056</td>
+<td>kg</td>
+</tr>
+<tr>
+<td>Durchsatz gesamt</td>
+<td class="font-medium">516.794</td>
+<td>kg</td>
+</tr>
+<tr>
+<td>Stillstandszeit</td>
+<td class="font-medium">14,5</td>
+<td>Stunden</td>
+</tr>
+<tr>
+<td>Ø Paletten pro Tag</td>
+<td class="font-medium">44,3</td>
+<td>Paletten/Tag</td>
+</tr>
+<tr>
+<td>Ø Rohgewicht pro Palette</td>
+<td class="font-medium">1.751</td>
+<td>kg/Palette</td>
+</tr>
+<tr>
+<td>Qualitätsrate</td>
+<td class="font-medium">95,2%</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<!-- Month Tab -->
+<div class="content-tab" id="content-month">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+<div class="kpi-card">
+<div class="kpi-title">Performance [%] (Ø Monat)</div>
+<div class="gauge"><canvas id="month-g1"></canvas><div class="value">70%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Verluste [%] (Ø Monat)</div>
+<div class="gauge"><canvas id="month-g2"></canvas><div class="value">5.0%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Kosten €/kg (Ø Monat)</div>
+<div class="gauge"><canvas id="month-g3"></canvas><div class="value">0.43€</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Produktivität kg/h (Ø Monat)</div>
+<div class="gauge"><canvas id="month-g4"></canvas><div class="value">500</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Qualität [gut / mittel / schlecht]</div>
+<div class="gauge">
+<canvas id="month-g5"></canvas>
+<div class="value">mittel</div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-8 text-center mt-6">
+<h2 class="text-xl font-semibold mb-4">Monatsdatenübersicht</h2>
+<p class="text-gray-600">Detaillierte Monatsdaten und Diagramme werden hier angezeigt.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Monatsverlauf der Kennzahlen</h2>
+<canvas class="w-full h-72" id="month-chart-left"></canvas>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Kumulative Monatsmengen</h2>
+<canvas class="w-full h-72" id="month-chart-right"></canvas>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-6 mt-6"><h2 class="font-semibold mb-4">Monatszusammenfassung</h2><table class="week-summary-table w-full"><thead><tr class="bg-gray-50"><th>Kennzahl</th><th>Wert</th><th>Einheit</th></tr></thead><tbody><tr><td>Anzahl Paletten (gesamt)</td><td class="font-medium">1240</td><td>Paletten</td></tr><tr><td>Gesamtrohgewicht</td><td class="font-medium">2.171.400</td><td>kg</td></tr><tr><td>Gesamtverlust</td><td class="font-medium">104.224</td><td>kg</td></tr><tr><td>Durchsatz gesamt</td><td class="font-medium">2.067.176</td><td>kg</td></tr><tr><td>Stillstandszeit</td><td class="font-medium">58</td><td>Stunden</td></tr><tr><td>Ø Paletten pro Tag</td><td class="font-medium">41,3</td><td>Paletten/Tag</td></tr><tr><td>Ø Rohgewicht pro Palette</td><td class="font-medium">1.751</td><td>kg/Palette</td></tr><tr><td>Qualitätsrate</td><td class="font-medium">95,2%</td><td></td></tr></tbody></table></div></div>
+<!-- Year Tab -->
+<div class="content-tab" id="content-year">
+<div class="grid grid-cols-2 md:grid-cols-5 gap-6">
+<div class="kpi-card">
+<div class="kpi-title">Performance [%] (Ø Jahr)</div>
+<div class="gauge"><canvas id="year-g1"></canvas><div class="value">71%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Verluste [%] (Ø Jahr)</div>
+<div class="gauge"><canvas id="year-g2"></canvas><div class="value">4.9%</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Kosten €/kg (Ø Jahr)</div>
+<div class="gauge"><canvas id="year-g3"></canvas><div class="value">0.41€</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Produktivität kg/h (Ø Jahr)</div>
+<div class="gauge"><canvas id="year-g4"></canvas><div class="value">505</div></div>
+</div>
+<div class="kpi-card">
+<div class="kpi-title">Qualität [gut / mittel / schlecht]</div>
+<div class="gauge">
+<canvas id="year-g5"></canvas>
+<div class="value">mittel</div>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-8 text-center mt-6">
+<h2 class="text-xl font-semibold mb-4">Jahresdatenübersicht</h2>
+<p class="text-gray-600">Detaillierte Jahresdaten und Diagramme werden hier angezeigt.</p>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Jahresverlauf der Kennzahlen</h2>
+<canvas class="w-full h-72" id="year-chart-left"></canvas>
+</div>
+<div class="bg-white rounded-lg shadow p-4">
+<h2 class="text-lg font-semibold mb-2 chart-title">Jährliche Gesamtproduktion</h2>
+<canvas class="w-full h-72" id="year-chart-right"></canvas>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-lg shadow p-6 mt-6"><h2 class="font-semibold mb-4">Jahreszusammenfassung</h2><table class="week-summary-table w-full"><thead><tr class="bg-gray-50"><th>Kennzahl</th><th>Wert</th><th>Einheit</th></tr></thead><tbody><tr><td>Anzahl Paletten (gesamt)</td><td class="font-medium">1240</td><td>Paletten</td></tr><tr><td>Gesamtrohgewicht</td><td class="font-medium">2.171.400</td><td>kg</td></tr><tr><td>Gesamtverlust</td><td class="font-medium">104.224</td><td>kg</td></tr><tr><td>Durchsatz gesamt</td><td class="font-medium">2.067.176</td><td>kg</td></tr><tr><td>Stillstandszeit</td><td class="font-medium">58</td><td>Stunden</td></tr><tr><td>Ø Paletten pro Tag</td><td class="font-medium">41,3</td><td>Paletten/Tag</td></tr><tr><td>Ø Rohgewicht pro Palette</td><td class="font-medium">1.751</td><td>kg/Palette</td></tr><tr><td>Qualitätsrate</td><td class="font-medium">95,2%</td><td></td></tr></tbody></table></div></div>
+</main>
+<div class="modal" id="modal">
+<div class="content">
+<button class="text-gray-500 float-right m-4" onclick="closeModal()">✖</button>
+<div class="p-4" id="modal-content"></div>
+</div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/plugins/monthSelect/index.js"></script>
+<script>
+        // Initialisierung des Datums-Pickers
+        const today = new Date();
+        const DateTime = luxon.DateTime;
+        
+        // Einheitsfilter
+        let currentUnit = 'kg'; // Standard: €/kg
+        const unitKg = document.getElementById('unit-kg');
+        const unitPiece = document.getElementById('unit-piece');
+        
+        unitKg.addEventListener('click', () => {
+            if (currentUnit !== 'kg') {
+                currentUnit = 'kg';
+                unitKg.classList.add('active');
+                unitPiece.classList.remove('active');
+                updateUnitDependentElements();
+            }
+        });
+        
+        unitPiece.addEventListener('click', () => {
+            if (currentUnit !== 'piece') {
+                currentUnit = 'piece';
+                unitPiece.classList.add('active');
+                unitKg.classList.remove('active');
+                updateUnitDependentElements();
+            }
+        });
+        
+        function updateUnitDependentElements() {
+            // Aktualisiere KPI-Titel
+            const costTitle = document.getElementById('cost-kpi-title');
+            if (costTitle) costTitle.textContent = currentUnit === 'kg' ? 'Kosten €/kg (Ø)' : 'Kosten €/Stück (Ø)';
+            const monthCostTitle = document.getElementById('month-cost-kpi-title');
+            if (monthCostTitle) monthCostTitle.textContent = currentUnit === 'kg' ? 'Kosten €/kg (Ø Monat)' : 'Kosten €/Stück (Ø Monat)';
+            const yearCostTitle = document.getElementById('year-cost-kpi-title');
+            if (yearCostTitle) yearCostTitle.textContent = currentUnit === 'kg' ? 'Kosten €/kg (Ø Jahr)' : 'Kosten €/Stück (Ø Jahr)';
+            
+            // Aktualisiere Diagramme
+            updateWeekChart();
+            if (document.getElementById('content-month').classList.contains('active')) {
+                updateMonthChart();
+            }
+            if (document.getElementById('content-year').classList.contains('active')) {
+                updateYearChart();
+            }
+        }
+        
+        // Schichtfilter
+        document.querySelectorAll('.shift-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.shift-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                
+                // Hier könnten Sie die Daten basierend auf der ausgewählten Schicht aktualisieren
+                console.log('Ausgewählte Schicht:', this.dataset.shift);
+            });
+        });
+        
+        // Datumsauswahl für verschiedene Tabs
+        const datePickerDay = document.getElementById('date-picker-day');
+        const datePickerWeek = document.getElementById('date-picker-week');
+        const datePickerMonth = document.getElementById('date-picker-month');
+        const datePickerYear = document.getElementById('date-picker-year');
+        const weekNumberDisplay = document.getElementById('week-number');
+        
+        // Heute als Standard setzen
+        const yyyy = today.getFullYear();
+        const mm = String(today.getMonth()+1).padStart(2,'0');
+        const dd = String(today.getDate()).padStart(2,'0');
+        const todayStr = `${yyyy}-${mm}-${dd}`;
+        datePickerDay.value = todayStr;
+        
+        // Monat und Jahr als Standard setzen
+        datePickerMonth.value = `${yyyy}-${mm}`;
+        datePickerYear.value = yyyy;
+        
+        // Woche berechnen
+        const todayISO = DateTime.fromISO(todayStr);
+        const weekNumber = todayISO.weekNumber;
+        const weekYear = todayISO.weekYear;
+        datePickerWeek.value = `${weekYear}-W${weekNumber.toString().padStart(2, '0')}`;
+        weekNumberDisplay.textContent = weekNumber;
+        
+        // Änderungen im Wochen-Picker
+        datePickerWeek.addEventListener('change', function() {
+            const weekValue = this.value;
+            const [year, week] = weekValue.split('-W');
+            weekNumberDisplay.textContent = week;
+            updateWeekChart();
+        });
+
+        // KPI-Gauges für Tagesansicht erstellen
+        [['g1', 68, 100, '#10B981'], ['g2', 5.2, 20, '#EF4444'], ['g3', 0.45, 1, '#3B82F6'], ['g4', 480, 1000, '#8B5CF6']].forEach(([id, val, max, color]) => {
+            new Chart(document.getElementById(id), { 
+                type: 'doughnut', 
+                data: {
+                    datasets: [{
+                        data: [val, max - val],
+                        backgroundColor: [color, '#E5E7EB']
+                    }]
+                }, 
+                options: {
+                    rotation: 270,
+                    circumference: 180,
+                    cutout: '75%',
+                    plugins: { tooltip: { enabled: false } },
+                    responsive: false,
+                    animation: false
+                } 
+            });
+        });
+
+        // KPI-Gauges für Wochenansicht erstellen
+        [['week-g1', 72, 100, '#10B981'], ['week-g2', 4.8, 20, '#EF4444'], ['week-g3', 0.42, 1, '#3B82F6'], ['week-g4', 510, 1000, '#8B5CF6']].forEach(([id, val, max, color]) => {
+            new Chart(document.getElementById(id), { 
+                type: 'doughnut', 
+                data: {
+                    datasets: [{
+                        data: [val, max - val],
+                        backgroundColor: [color, '#E5E7EB']
+                    }]
+                }, 
+                options: {
+                    rotation: 270,
+                    circumference: 180,
+                    cutout: '75%',
+                    plugins: { tooltip: { enabled: false } },
+                    responsive: false,
+                    animation: false
+                } 
+            });
+        });
+
+        // KPI-Gauges für Monatsansicht erstellen
+        [['month-g1', 70, 100, '#10B981'], ['month-g2', 5.0, 20, '#EF4444'], ['month-g3', 0.43, 1, '#3B82F6'], ['month-g4', 500, 1000, '#8B5CF6']].forEach(([id, val, max, color]) => {
+            new Chart(document.getElementById(id), { 
+                type: 'doughnut', 
+                data: {
+                    datasets: [{
+                        data: [val, max - val],
+                        backgroundColor: [color, '#E5E7EB']
+                    }]
+                }, 
+                options: {
+                    rotation: 270,
+                    circumference: 180,
+                    cutout: '75%',
+                    plugins: { tooltip: { enabled: false } },
+                    responsive: false,
+                    animation: false
+                } 
+            });
+        });
+
+        // KPI-Gauges für Jahresansicht erstellen
+        [['year-g1', 71, 100, '#10B981'], ['year-g2', 4.9, 20, '#EF4444'], ['year-g3', 0.41, 1, '#3B82F6'], ['year-g4', 505, 1000, '#8B5CF6']].forEach(([id, val, max, color]) => {
+            new Chart(document.getElementById(id), { 
+                type: 'doughnut', 
+                data: {
+                    datasets: [{
+                        data: [val, max - val],
+                        backgroundColor: [color, '#E5E7EB']
+                    }]
+                }, 
+                options: {
+                    rotation: 270,
+                    circumference: 180,
+                    cutout: '75%',
+                    plugins: { tooltip: { enabled: false } },
+                    responsive: false,
+                    animation: false
+                } 
+            });
+        });
+
+        // Generierung simulierte Messdaten für Tagesansicht
+        const dayHours = ['07:00', '08:00', '09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00', '20:00', '21:00', '22:00', '23:00'];
+        const simulatedRawHourly = [
+            // Frühschicht (07:00 - 15:00)
+            {hour: '07:00', raw: 100, processed: 80, losses: 5},
+            {hour: '08:00', raw: 150, processed: 130, losses: 7},
+            {hour: '09:00', raw: 200, processed: 180, losses: 10},
+            {hour: '10:00', raw: 220, processed: 200, losses: 8},
+            {hour: '11:00', raw: 210, processed: 190, losses: 9},
+            {hour: '12:00', raw: 230, processed: 210, losses: 11},
+            {hour: '13:00', raw: 200, processed: 185, losses: 7},
+            {hour: '14:00', raw: 180, processed: 160, losses: 8},
+            {hour: '15:00', raw: 160, processed: 140, losses: 6}, // Schichtwechsel / Übergabe
+            // Spätschicht (15:00 - 23:00)
+            {hour: '16:00', raw: 190, processed: 170, losses: 9},
+            {hour: '17:00', raw: 210, processed: 190, losses: 10},
+            {hour: '18:00', raw: 230, processed: 205, losses: 12},
+            {hour: '19:00', raw: 220, processed: 195, losses: 11},
+            {hour: '20:00', raw: 200, processed: 180, losses: 9},
+            {hour: '21:00', raw: 180, processed: 160, losses: 8},
+            {hour: '22:00', raw: 150, processed: 130, losses: 7},
+            {hour: '23:00', raw: 100, processed: 85, losses: 5}
+        ];
+
+        let dayChartLeft, dayChartRight;
+
+        function updateDayCharts() {
+            // Linkes Diagramm: Rohgewichtsmessungen im Zeitverlauf
+            const rawWeights = simulatedRawHourly.map(d => d.raw);
+            const processedWeights = simulatedRawHourly.map(d => d.processed);
+            const labels = simulatedRawHourly.map(d => d.hour);
+
+            if (dayChartLeft) {
+                dayChartLeft.data.labels = labels;
+                dayChartLeft.data.datasets[0].data = rawWeights;
+                dayChartLeft.data.datasets[1].data = processedWeights;
+                dayChartLeft.update();
+            } else {
+                dayChartLeft = new Chart(document.getElementById('chart-left'), { 
+                    type: 'line', 
+                    data: { 
+                        labels: labels, 
+                        datasets: [ 
+                            {
+                                label: 'Rohgewicht (kg)',
+                                data: rawWeights,
+                                borderColor: '#3B82F6', // Blau
+                                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#3B82F6'
+                            },
+                            {
+                                label: 'Verarbeitetes Gewicht (kg)',
+                                data: processedWeights,
+                                borderColor: '#10B981', // Grün
+                                backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                                fill: true,
+                                tension: 0.3,
+                                pointRadius: 3,
+                                pointBackgroundColor: '#10B981'
+                            }
+                        ]}, 
+                    options: { 
+                        scales: {
+                            x: {
+                                title: { display: true, text: 'Uhrzeit' }
+                            },
+                            y: {
+                                beginAtZero: true,
+                                title: { display: true, text: 'Gewicht (kg)' }
+                            }
+                        },
+                        plugins: { 
+                            legend: { display: true, position: 'top' },
+                            tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                            }
+                        },
+                        animation: false 
+                    } 
+                });
+            }
+        }
+        
+        // Initialer Aufruf für das Tagesdiagramm
+        updateDayCharts();
+
+        // Umschaltung von Tabs
+        function switchTab(tabName) {
+            // Aktualisiere Tabs
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('tab-active'));
+            document.getElementById(`tab-${tabName}`).classList.add('tab-active');
+            
+            // Aktualisiere Inhalt
+            document.querySelectorAll('.content-tab').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.getElementById(`content-${tabName}`).classList.add('active');
+            
+            // Aktualisiere Date-Picker
+            document.getElementById('day-date-filter').classList.toggle('hidden', tabName !== 'day');
+            document.getElementById('week-date-filter').classList.toggle('hidden', tabName !== 'week');
+            document.getElementById('month-date-filter').classList.toggle('hidden', tabName !== 'month');
+            document.getElementById('year-date-filter').classList.toggle('hidden', tabName !== 'year');
+        }
+        
+        ['day','week','month','year'].forEach(t => {
+            document.getElementById('tab-'+t).onclick = () => switchTab(t);
+        });
+
+        // Initialisiere die Monats- und Jahrescharts beim Laden
+        window.addEventListener('load', () => {
+            updateDayCharts();
+        });
+        
+        // Funktion zum Öffnen des Dashboards
+        function openDashboard(key, period) {
+            const m = {
+                'A': { title: 'Performance Details', unit: '%' },
+                'B': { title: 'Verluste Details', unit: '%' },
+                'C': { title: 'Kosten Details', unit: currentUnit === 'kg' ? '€/kg' : '€/Stück' },
+                'D': { title: 'Produktivität Details', unit: 'kg/h' },
+                'E': { title: 'Qualität Details', unit: '' }
+            }[key];
+            
+            let html = `
+                <div class="h-full flex flex-col">
+                    <div class="flex justify-between items-center p-4 bg-white border-b">
+                        <h3 class="text-xl font-bold">${m.title} (${period === 'day' ? 'Tag' : (period === 'week' ? 'Woche' : (period === 'month' ? 'Monat' : 'Jahr'))})</h3>
+                        <button class="text-gray-500 text-2xl" onclick="closeModal()">✖</button>
+                    </div>
+                    <div class="metric-summary">
+                        <div class="metric-card">
+                            <div class="metric-label">${period === 'day' ? 'Durchschnitt' : (period === 'week' ? 'Wochen-Durchschnitt' : (period === 'month' ? 'Monats-Durchschnitt' : 'Jahres-Durchschnitt'))}</div>
+                            <div class="metric-value">
+                                ${key === 'A' ? (period === 'day' ? '68%' : (period === 'week' ? '72%' : (period === 'month' ? '70%' : '71%'))) : 
+                                key === 'B' ? (period === 'day' ? '5.2%' : (period === 'week' ? '4.8%' : (period === 'month' ? '5.0%' : '4.9%'))) : 
+                                key === 'C' ? (period === 'day' ? '0.45€' : (period === 'week' ? '0.42€' : (period === 'month' ? '0.43€' : '0.41€'))) : 
+                                key === 'D' ? (period === 'day' ? '480' : (period === 'week' ? '510' : (period === 'month' ? '500' : '505'))) : 
+                                'mittel'}
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">${period === 'day' ? 'Frühschicht' : (period === 'week' ? 'Bester Tag' : (period === 'month' ? 'Bester Monat' : 'Bestes Jahr'))}</div>
+                            <div class="metric-value">
+                                ${key === 'A' ? (period === 'day' ? '72%' : (period === 'week' ? '75%' : (period === 'month' ? '74%' : '71%'))) : 
+                                key === 'B' ? (period === 'day' ? '4.8%' : (period === 'week' ? '4.5%' : (period === 'month' ? '4.6%' : '4.9%'))) : 
+                                key === 'C' ? (period === 'day' ? '0.40€' : (period === 'week' ? '0.40€' : (period === 'month' ? '0.40€' : '0.41€'))) : 
+                                key === 'D' ? (period === 'day' ? '520' : (period === 'week' ? '530' : (period === 'month' ? '540' : '505'))) : 
+                                'gut'}
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">${period === 'day' ? 'Spätschicht' : (period === 'week' ? 'Schlechtester Tag' : (period === 'month' ? 'Schlechtester Monat' : 'Schlechtestes Jahr'))}</div>
+                            <div class="metric-value">
+                                ${key === 'A' ? (period === 'day' ? '64%' : (period === 'week' ? '65%' : (period === 'month' ? '68%' : '65%'))) : 
+                                key === 'B' ? (period === 'day' ? '5.6%' : (period === 'week' ? '5.8%' : (period === 'month' ? '5.5%' : '6.0%'))) : 
+                                key === 'C' ? (period === 'day' ? '0.50€' : (period === 'week' ? '0.46€' : (period === 'month' ? '0.46€' : '0.50€'))) : 
+                                key === 'D' ? (period === 'day' ? '440' : (period === 'week' ? '480' : (period === 'month' ? '480' : '450'))) : 
+                                'schlecht'}
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-label">Zielwert</div>
+                            <div class="metric-value">
+                                ${key === 'A' ? '75%' : 
+                                key === 'B' ? '4.0%' : 
+                                key === 'C' ? '0.38€' : 
+                                key === 'D' ? '550' : 
+                                'gut'}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="dashboard-tabs">
+                        <div class="dashboard-tab active" data-dashboard="overview">Übersicht</div>
+                        <div class="dashboard-tab" data-dashboard="details">Details</div>
+                        ${period === 'week' || period === 'month' || period === 'year' ? '<div class="dashboard-tab" data-dashboard="trends">Trends</div>' : ''}
+                    </div>
+                    <div class="dashboard-grid" id="dashboard-charts">
+                        <div class="dashboard-card">
+                            <h4 class="font-semibold mb-2 chart-title">${key === 'A' ? 'Performance Verlauf' : key === 'B' ? 'Verluste Entwicklung' : key === 'C' ? 'Kostenanalyse' : 'Produktivität'}</h4>
+                            <canvas id="detail-chart-1"></canvas>
+                        </div>
+                        <div class="dashboard-card">
+                            <h4 class="font-semibold mb-2 chart-title">${key === 'A' ? 'Vergleich nach Schicht' : key === 'B' ? 'Verlustquellen' : key === 'C' ? 'Kostenverteilung' : 'Produktivitätsfaktoren'}</h4>
+                            <canvas id="detail-chart-2"></canvas>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('modal-content').innerHTML = html;
+            document.getElementById('modal').classList.add('open');
+            
+            // Render Charts
+            renderDashboardCharts(key, period);
+        }
+
+        function renderDashboardCharts(key, period) {
+            // Hier würden Sie die Detaildiagramme für das Dashboard rendern
+            // Vereinfachte Implementierung für dieses Beispiel
+            const ctx1 = document.getElementById('detail-chart-1').getContext('2d');
+            const ctx2 = document.getElementById('detail-chart-2').getContext('2d');
+            
+            new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun'],
+                    datasets: [{
+                        label: key === 'A' ? 'Performance' : key === 'B' ? 'Verluste' : key === 'C' ? 'Kosten' : 'Produktivität',
+                        data: [65, 70, 68, 72, 75, 71],
+                        borderColor: '#3B82F6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true
+                    }]
+                }
+            });
+            
+            new Chart(ctx2, {
+                type: 'bar',
+                data: {
+                    labels: ['Frühschicht', 'Spätschicht'],
+                    datasets: [{
+                        label: key === 'A' ? 'Performance' : key === 'B' ? 'Verluste' : key === 'C' ? 'Kosten' : 'Produktivität',
+                        data: [72, 64],
+                        backgroundColor: ['#10B981', '#EF4444']
+                    }]
+                }
+            });
+        }
+
+        // Modal Funktionen
+        function closeModal() {
+            document.getElementById('modal').classList.remove('open');
+        }
+        
+        // Event-Listener für KPI-Karten
+        document.querySelectorAll('.kpi-card').forEach(card => {
+            card.addEventListener('click', function() {
+                // Vereinfachte Logik zur Bestimmung des KPI-Typs
+                const title = this.querySelector('.kpi-title').textContent;
+                let key = 'A';
+                if (title.includes('Verluste')) key = 'B';
+                if (title.includes('Kosten')) key = 'C';
+                if (title.includes('Produktivität')) key = 'D';
+                if (title.includes('Qualität')) key = 'E';
+                
+                // Bestimme den aktuellen Zeitraum
+                let period = 'day';
+                if (document.getElementById('content-week').classList.contains('active')) period = 'week';
+                if (document.getElementById('content-month').classList.contains('active')) period = 'month';
+                if (document.getElementById('content-year').classList.contains('active')) period = 'year';
+                
+                openDashboard(key, period);
+            });
+        });
+    </script>
+</body>
+</html>

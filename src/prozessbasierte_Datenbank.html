@@ -1,0 +1,1551 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VeggiePro Produktions-Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@2.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+    <style>
+        :root {
+            --primary: #2c786c;
+            --secondary: #ff9800;
+            --success: #4caf50;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .dashboard-header {
+            background: linear-gradient(135deg, var(--primary), #004445);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo {
+            background-color: white;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            color: var(--primary);
+        }
+        
+        .filter-section {
+            background-color: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+        
+        .nav-tabs .nav-link {
+            font-weight: 600;
+            color: var(--dark);
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px 8px 0 0;
+        }
+        
+        .nav-tabs .nav-link.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .kpi-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transition: transform 0.3s;
+            height: 100%;
+        }
+        
+        .kpi-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .kpi-value {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 10px 0;
+        }
+        
+        .kpi-title {
+            font-size: 14px;
+            color: #6c757d;
+            font-weight: 500;
+        }
+        
+        .kpi-icon {
+            font-size: 28px;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+        
+        .metric-group {
+            background-color: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .metric-group-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--light);
+            color: var(--primary);
+        }
+        
+        .chart-container {
+            height: 250px;
+            margin-top: 15px;
+        }
+        
+        .trend-up {
+            color: var(--success);
+        }
+        
+        .trend-down {
+            color: var(--danger);
+        }
+        
+        .metric-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .metric-item {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .metric-label {
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .metric-value {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 20px 0;
+            margin-top: 30px;
+            font-size: 14px;
+        }
+        
+        .tab-pane {
+            display: none;
+        }
+        
+        .tab-pane.active {
+            display: block;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .data-table {
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        .data-table th {
+            background-color: #f1f1f1;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .filter-container {
+            display: flex;
+            justify-content: flex-end;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            min-width: 180px;
+        }
+        
+        .filter-label {
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #495057;
+            font-weight: 500;
+        }
+        
+        .chart-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 992px) {
+            .chart-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="logo-container">
+                        <div class="logo">
+                            <i class="fas fa-carrot"></i>
+                        </div>
+                        <div>
+                            <h1>VeggiePro Produktions-Dashboard</h1>
+                            <p class="mb-0">Echtzeit-Überwachung und Analyse der Produktionsleistung</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="d-inline-block bg-white text-dark px-3 py-2 rounded-pill">
+                        <i class="fas fa-sync-alt me-2"></i>Zuletzt aktualisiert: <span id="last-updated">13.06.2025 14:28</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <!-- Filter Section -->
+        <div class="filter-section">
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <label class="form-label">Zeitraum</label>
+                    <select class="form-select" id="time-period">
+                        <option value="day">Tag (Heute: 13.06.2025)</option>
+                        <option value="week">Woche (KW 24, 10.06 - 16.06)</option>
+                        <option value="month">Monat (Juni 2025)</option>
+                        <option value="year">Jahr (2025)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Artikel</label>
+                    <select class="form-select" id="product-select">
+                        <option selected>Alle Artikel</option>
+                        <option>Kartoffel A</option>
+                        <option>Karotte B</option>
+                        <option>Zwiebel C</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Schicht</label>
+                    <select class="form-select" id="shift-select">
+                        <option selected>Alle Schichten</option>
+                        <option>Frühschicht (08:00-20:00)</option>
+                        <option>Spätschicht (20:00-08:00)</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">Einheit</label>
+                    <select class="form-select" id="unit-select">
+                        <option selected>kg</option>
+                        <option>Stück</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tabs -->
+        <ul class="nav nav-tabs" id="dashboardTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="day-tab" data-bs-toggle="tab" data-bs-target="#day" type="button" role="tab">
+                    <i class="fas fa-sun me-2"></i>Tag
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="week-tab" data-bs-toggle="tab" data-bs-target="#week" type="button" role="tab">
+                    <i class="fas fa-calendar-week me-2"></i>Woche
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="month-tab" data-bs-toggle="tab" data-bs-target="#month" type="button" role="tab">
+                    <i class="fas fa-calendar-alt me-2"></i>Monat
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="year-tab" data-bs-toggle="tab" data-bs-target="#year" type="button" role="tab">
+                    <i class="fas fa-calendar-star me-2"></i>Jahr
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content mt-3" id="dashboardTabsContent">
+            <!-- Day Tab -->
+            <div class="tab-pane fade show active" id="day" role="tabpanel">
+                <!-- Top KPIs -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="kpi-value">1.250 kg</div>
+                            <div class="kpi-title">Gesamte Produktion</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-up"></i> 5,2% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <div class="kpi-value">150 kg</div>
+                            <div class="kpi-title">Gesamter Ausschuss</div>
+                            <div class="text-danger mt-1"><i class="fas fa-arrow-up"></i> 2,1% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <div class="kpi-value">720,50 €</div>
+                            <div class="kpi-title">Betriebskosten</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 3,5% vs. Plan</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="kpi-value">0,58 €/kg</div>
+                            <div class="kpi-title">Kosten pro kg</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 1,8% vs. Plan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Groups -->
+                <div class="row">
+                    <!-- Qualität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-award me-2"></i>Qualität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Reklamationen</span>
+                                    <span class="metric-value">2</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Nacharbeit Container</span>
+                                    <span class="metric-value">5</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Ausschussquote</span>
+                                    <span class="metric-value">10,7%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Qualitätskonformität</span>
+                                    <span class="metric-value">97,3%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="qualityChartDay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leistung Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-tachometer-alt me-2"></i>Leistung</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Auslastung</span>
+                                    <span class="metric-value">85%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Stillstand</span>
+                                    <span class="metric-value">15%</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">OEE</span>
+                                    <span class="metric-value">78,4%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Rüstzeit</span>
+                                    <span class="metric-value">12,5%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChartDay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kosten Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-euro-sign me-2"></i>Kosten</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Personalkosten</span>
+                                    <span class="metric-value">350 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Energiekosten</span>
+                                    <span class="metric-value">120 €</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Verpackungskosten</span>
+                                    <span class="metric-value">200 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Sonstige Kosten</span>
+                                    <span class="metric-value">50,50 €</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="costChartDay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Produktivität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-chart-line me-2"></i>Produktivität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">kg/Stunde</span>
+                                    <span class="metric-value">125</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Container/Stunde</span>
+                                    <span class="metric-value">25</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Effizienz</span>
+                                    <span class="metric-value">92%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Paletten/Tag</span>
+                                    <span class="metric-value">18</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="productivityChartDay"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Week Tab -->
+            <div class="tab-pane fade" id="week" role="tabpanel">
+                <!-- Top KPIs -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="kpi-value">8.750 kg</div>
+                            <div class="kpi-title">Gesamte Produktion</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-up"></i> 4,8% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <div class="kpi-value">980 kg</div>
+                            <div class="kpi-title">Gesamter Ausschuss</div>
+                            <div class="text-danger mt-1"><i class="fas fa-arrow-up"></i> 1,9% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <div class="kpi-value">4.980 €</div>
+                            <div class="kpi-title">Betriebskosten</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 2,8% vs. Plan</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="kpi-value">0,57 €/kg</div>
+                            <div class="kpi-title">Kosten pro kg</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 2,1% vs. Plan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Groups -->
+                <div class="row">
+                    <!-- Qualität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-award me-2"></i>Qualität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Reklamationen</span>
+                                    <span class="metric-value">12</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Nacharbeit Container</span>
+                                    <span class="metric-value">35</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Ausschussquote</span>
+                                    <span class="metric-value">11,2%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Qualitätskonformität</span>
+                                    <span class="metric-value">96,8%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="qualityChartWeek"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leistung Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-tachometer-alt me-2"></i>Leistung</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Auslastung</span>
+                                    <span class="metric-value">83%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Stillstand</span>
+                                    <span class="metric-value">17%</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">OEE</span>
+                                    <span class="metric-value">76,5%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Rüstzeit</span>
+                                    <span class="metric-value">13,2%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChartWeek"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kosten Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-euro-sign me-2"></i>Kosten</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Personalkosten</span>
+                                    <span class="metric-value">2.450 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Energiekosten</span>
+                                    <span class="metric-value">840 €</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Verpackungskosten</span>
+                                    <span class="metric-value">1.400 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Sonstige Kosten</span>
+                                    <span class="metric-value">290 €</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="costChartWeek"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Produktivität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-chart-line me-2"></i>Produktivität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">kg/Stunde</span>
+                                    <span class="metric-value">122</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Container/Stunde</span>
+                                    <span class="metric-value">24</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Effizienz</span>
+                                    <span class="metric-value">90%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Paletten/Woche</span>
+                                    <span class="metric-value">125</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="productivityChartWeek"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Month Tab -->
+            <div class="tab-pane fade" id="month" role="tabpanel">
+                <!-- Top KPIs -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="kpi-value">35.200 kg</div>
+                            <div class="kpi-title">Gesamte Produktion</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-up"></i> 4,5% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <div class="kpi-value">3.850 kg</div>
+                            <div class="kpi-title">Gesamter Ausschuss</div>
+                            <div class="text-danger mt-1"><i class="fas fa-arrow-up"></i> 1,7% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <div class="kpi-value">20.150 €</div>
+                            <div class="kpi-title">Betriebskosten</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 3,2% vs. Plan</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="kpi-value">0,57 €/kg</div>
+                            <div class="kpi-title">Kosten pro kg</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 2,3% vs. Plan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Groups -->
+                <div class="row">
+                    <!-- Qualität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-award me-2"></i>Qualität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Reklamationen</span>
+                                    <span class="metric-value">48</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Nacharbeit Container</span>
+                                    <span class="metric-value">142</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Ausschussquote</span>
+                                    <span class="metric-value">10,9%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Qualitätskonformität</span>
+                                    <span class="metric-value">97,1%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="qualityChartMonth"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leistung Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-tachometer-alt me-2"></i>Leistung</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Auslastung</span>
+                                    <span class="metric-value">84%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Stillstand</span>
+                                    <span class="metric-value">16%</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">OEE</span>
+                                    <span class="metric-value">77,2%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Rüstzeit</span>
+                                    <span class="metric-value">12,8%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChartMonth"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kosten Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-euro-sign me-2"></i>Kosten</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Personalkosten</span>
+                                    <span class="metric-value">9.800 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Energiekosten</span>
+                                    <span class="metric-value">3.360 €</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Verpackungskosten</span>
+                                    <span class="metric-value">5.600 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Sonstige Kosten</span>
+                                    <span class="metric-value">1.390 €</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="costChartMonth"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Produktivität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-chart-line me-2"></i>Produktivität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">kg/Stunde</span>
+                                    <span class="metric-value">124</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Container/Stunde</span>
+                                    <span class="metric-value">25</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Effizienz</span>
+                                    <span class="metric-value">91%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Paletten/Monat</span>
+                                    <span class="metric-value">520</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="productivityChartMonth"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Year Tab -->
+            <div class="tab-pane fade" id="year" role="tabpanel">
+                <!-- Top KPIs -->
+                <div class="row mb-4">
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="kpi-value">425.000 kg</div>
+                            <div class="kpi-title">Gesamte Produktion</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-up"></i> 5,1% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-danger bg-opacity-10 text-danger">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                            <div class="kpi-value">46.500 kg</div>
+                            <div class="kpi-title">Gesamter Ausschuss</div>
+                            <div class="text-danger mt-1"><i class="fas fa-arrow-up"></i> 1,5% vs. Ziel</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-euro-sign"></i>
+                            </div>
+                            <div class="kpi-value">245.800 €</div>
+                            <div class="kpi-title">Betriebskosten</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 3,8% vs. Plan</div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="kpi-card">
+                            <div class="kpi-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div class="kpi-value">0,58 €/kg</div>
+                            <div class="kpi-title">Kosten pro kg</div>
+                            <div class="text-success mt-1"><i class="fas fa-arrow-down"></i> 2,5% vs. Plan</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Metric Groups -->
+                <div class="row">
+                    <!-- Qualität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-award me-2"></i>Qualität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Reklamationen</span>
+                                    <span class="metric-value">576</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Nacharbeit Container</span>
+                                    <span class="metric-value">1.704</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Ausschussquote</span>
+                                    <span class="metric-value">10,9%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Qualitätskonformität</span>
+                                    <span class="metric-value">97,0%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="qualityChartYear"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Leistung Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-tachometer-alt me-2"></i>Leistung</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Auslastung</span>
+                                    <span class="metric-value">84%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Stillstand</span>
+                                    <span class="metric-value">16%</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">OEE</span>
+                                    <span class="metric-value">77,3%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Rüstzeit</span>
+                                    <span class="metric-value">12,7%</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="performanceChartYear"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kosten Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-euro-sign me-2"></i>Kosten</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Personalkosten</span>
+                                    <span class="metric-value">117.600 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Energiekosten</span>
+                                    <span class="metric-value">40.320 €</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Verpackungskosten</span>
+                                    <span class="metric-value">67.200 €</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Sonstige Kosten</span>
+                                    <span class="metric-value">20.680 €</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="costChartYear"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Produktivität Group -->
+                    <div class="col-md-6">
+                        <div class="metric-group">
+                            <h3 class="metric-group-title"><i class="fas fa-chart-line me-2"></i>Produktivität</h3>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">kg/Stunde</span>
+                                    <span class="metric-value">123</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Container/Stunde</span>
+                                    <span class="metric-value">24</span>
+                                </div>
+                            </div>
+                            <div class="metric-row">
+                                <div class="metric-item">
+                                    <span class="metric-label">Effizienz</span>
+                                    <span class="metric-value">91%</span>
+                                </div>
+                                <div class="metric-item">
+                                    <span class="metric-label">Paletten/Jahr</span>
+                                    <span class="metric-value">6.240</span>
+                                </div>
+                            </div>
+                            <div class="chart-container">
+                                <canvas id="productivityChartYear"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container text-center">
+            <p class="mb-0">VeggiePro Produktionsüberwachung &copy; 2025 | Echtzeit-Dashboard für Gemüseverarbeitung</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize charts for all tabs
+        document.addEventListener('DOMContentLoaded', function() {
+            // Day Charts
+            initDayCharts();
+            initWeekCharts();
+            initMonthCharts();
+            initYearCharts();
+            
+            // Tab switching
+            document.getElementById('time-period').addEventListener('change', function() {
+                const period = this.value;
+                if(period === 'day') document.getElementById('day-tab').click();
+                if(period === 'week') document.getElementById('week-tab').click();
+                if(period === 'month') document.getElementById('month-tab').click();
+                if(period === 'year') document.getElementById('year-tab').click();
+            });
+            
+            // Update time
+            updateLastUpdated();
+            setInterval(updateLastUpdated, 60000);
+        });
+        
+        function updateLastUpdated() {
+            const now = new Date();
+            const formatted = `${now.getDate().toString().padStart(2, '0')}.${(now.getMonth()+1).toString().padStart(2, '0')}.${now.getFullYear()} ${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            document.getElementById('last-updated').textContent = formatted;
+        }
+        
+        function initDayCharts() {
+            // Quality Chart
+            new Chart(document.getElementById('qualityChartDay').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00'],
+                    datasets: [{
+                        label: 'Ausschuss (kg/h)',
+                        data: [10, 15, 20, 18, 12, 8, 5],
+                        borderColor: '#f44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        annotation: {
+                            annotations: {
+                                normLine: {
+                                    type: 'line',
+                                    yMin: 10,
+                                    yMax: 10,
+                                    borderColor: '#4caf50',
+                                    borderWidth: 1,
+                                    borderDash: [5, 5]
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/h'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart
+            new Chart(document.getElementById('performanceChartDay').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Linie 1', 'Linie 2', 'Linie 3'],
+                    datasets: [{
+                        label: 'Netto-Produktion (kg)',
+                        data: [800, 450, 0],
+                        backgroundColor: ['#2c786c', '#57cc99', '#38b000'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'kg'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cost Chart
+            new Chart(document.getElementById('costChartDay').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Personal', 'Energie', 'Verpackung', 'Sonstiges'],
+                    datasets: [{
+                        data: [350, 120, 200, 50.5],
+                        backgroundColor: ['#2c786c', '#57cc99', '#ff9800', '#2196f3'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Productivity Chart
+            new Chart(document.getElementById('productivityChartDay').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Schichtbeginn', 'Mittag', 'Schichtende'],
+                    datasets: [{
+                        label: 'kg/Stunde',
+                        data: [100, 150, 125],
+                        borderColor: '#2c786c',
+                        backgroundColor: 'rgba(44, 120, 108, 0.1)',
+                        tension: 0.3,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/Stunde'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initWeekCharts() {
+            // Quality Chart (Week)
+            new Chart(document.getElementById('qualityChartWeek').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+                    datasets: [{
+                        label: 'Ausschuss (kg)',
+                        data: [140, 160, 150, 170, 190, 90, 80],
+                        backgroundColor: '#f44336'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart (Week)
+            new Chart(document.getElementById('performanceChartWeek').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+                    datasets: [
+                        {
+                            label: 'Auslastung (%)',
+                            data: [85, 82, 84, 80, 83, 75, 70],
+                            borderColor: '#2c786c',
+                            backgroundColor: 'rgba(44, 120, 108, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Ziel',
+                            data: [85, 85, 85, 85, 85, 85, 85],
+                            borderColor: '#4caf50',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cost Chart (Week)
+            new Chart(document.getElementById('costChartWeek').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Personal', 'Energie', 'Verpackung', 'Sonstiges'],
+                    datasets: [{
+                        data: [2450, 840, 1400, 290],
+                        backgroundColor: ['#2c786c', '#57cc99', '#ff9800', '#2196f3'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Productivity Chart (Week)
+            new Chart(document.getElementById('productivityChartWeek').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'],
+                    datasets: [
+                        {
+                            label: 'kg/Stunde',
+                            data: [125, 120, 122, 118, 123, 110, 105],
+                            backgroundColor: '#2c786c'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/Stunde'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initMonthCharts() {
+            // Quality Chart (Month)
+            new Chart(document.getElementById('qualityChartMonth').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['KW 23', 'KW 24', 'KW 25', 'KW 26'],
+                    datasets: [{
+                        label: 'Ausschussquote (%)',
+                        data: [11.5, 11.2, 10.8, 10.5],
+                        borderColor: '#f44336',
+                        backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart (Month)
+            new Chart(document.getElementById('performanceChartMonth').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Linie 1', 'Linie 2', 'Linie 3'],
+                    datasets: [{
+                        label: 'Durchsatz (kg/h)',
+                        data: [128, 118, 92],
+                        backgroundColor: '#2c786c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/h'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Cost Chart (Month)
+            new Chart(document.getElementById('costChartMonth').getContext('2d'), {
+                type: 'pie',
+                data: {
+                    labels: ['Personal', 'Energie', 'Verpackung', 'Sonstiges'],
+                    datasets: [{
+                        data: [9800, 3360, 5600, 1390],
+                        backgroundColor: ['#2c786c', '#57cc99', '#ff9800', '#2196f3'],
+                        borderWidth: 0
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'right' }
+                    }
+                }
+            });
+
+            // Productivity Chart (Month)
+            new Chart(document.getElementById('productivityChartMonth').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun'],
+                    datasets: [
+                        {
+                            label: 'kg/Stunde',
+                            data: [118, 120, 122, 121, 123, 124],
+                            borderColor: '#2c786c',
+                            backgroundColor: 'rgba(44, 120, 108, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Ziel',
+                            data: [120, 120, 120, 120, 120, 120],
+                            borderColor: '#4caf50',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/Stunde'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        function initYearCharts() {
+            // Quality Chart (Year)
+            new Chart(document.getElementById('qualityChartYear').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Q1', 'Q2', 'Q3', 'Q4'],
+                    datasets: [
+                        {
+                            label: 'Ausschussquote (%)',
+                            data: [11.2, 10.9, 10.7, 10.8],
+                            backgroundColor: '#f44336'
+                        },
+                        {
+                            label: 'Ziel',
+                            data: [11.0, 11.0, 11.0, 11.0],
+                            backgroundColor: '#4caf50'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            stacked: false
+                        },
+                        y: {
+                            stacked: false,
+                            title: {
+                                display: true,
+                                text: '%'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Performance Chart (Year)
+            new Chart(document.getElementById('performanceChartYear').getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: ['Auslastung', 'OEE', 'Effizienz', 'Durchsatz', 'Verfügbarkeit'],
+                    datasets: [{
+                        label: 'Leistung',
+                        data: [84, 77.3, 91, 123, 92],
+                        fill: true,
+                        backgroundColor: 'rgba(44, 120, 108, 0.2)',
+                        borderColor: '#2c786c',
+                        pointBackgroundColor: '#2c786c',
+                        pointBorderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: {
+                                display: true
+                            },
+                            suggestedMin: 50,
+                            suggestedMax: 100
+                        }
+                    }
+                }
+            });
+
+            // Cost Chart (Year)
+            new Chart(document.getElementById('costChartYear').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                    datasets: [{
+                        label: 'Kosten (€)',
+                        data: [20500, 19800, 21000, 20800, 21500, 20150, 19900, 18500, 22000, 21500, 23000, 24580],
+                        backgroundColor: '#2c786c'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false }
+                    },
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: '€'
+                            }
+                        }
+                    }
+                }
+            });
+
+            // Productivity Chart (Year)
+            new Chart(document.getElementById('productivityChartYear').getContext('2d'), {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                    datasets: [
+                        {
+                            label: 'kg/Stunde',
+                            data: [118, 120, 122, 121, 123, 124, 123, 125, 124, 125, 126, 125],
+                            borderColor: '#2c786c',
+                            backgroundColor: 'rgba(44, 120, 108, 0.1)',
+                            fill: true
+                        },
+                        {
+                            label: 'Ziel',
+                            data: [120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120, 120],
+                            borderColor: '#4caf50',
+                            borderDash: [5, 5],
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'kg/Stunde'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
