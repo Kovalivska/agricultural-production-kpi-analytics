@@ -9,7 +9,7 @@
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=flat&logo=opensource&logoColor=white)
 ![DSGVO](https://img.shields.io/badge/DSGVO-Konform-green.svg?style=flat&logo=shield&logoColor=white)
 
-[![Made in Germany](https://img.shields.io/badge/Made%20in-Germany-black.svg?style=flat&logo=germany&logoColor=white)](https://github.com/your-repo)
+[![Made in Germany](https://img.shields.io/badge/Made%20in-Germany-black.svg?style=flat&logo=germany&logoColor=white)](https://github.com/Kovalivska/agricultural-production-kpi-analytics)
 [![Data Coffee GmbH](https://img.shields.io/badge/Developed%20at-Data%20Coffee%20GmbH-blue.svg?style=flat&logo=coffee&logoColor=white)](https://datacoffee.de)
 
 **Intelligente KPI-Analytik für die Gemüseverarbeitung | 40+ KPIs |  Produktionsreif**
@@ -69,8 +69,8 @@ pip install pandas numpy matplotlib seaborn scipy plotly jupyter sqlite3
 ###  Quick Start
 ```bash
 # Repository klonen
-git clone https://github.com/your-username/Agricultural_Production_KPI_Analytics.git
-cd Agricultural_Production_KPI_Analytics
+git clone https://github.com/Kovalivska/agricultural-production-kpi-analytics.git
+cd agricultural-production-kpi-analytics
 
 # Hauptanalyse-Notebook öffnen
 jupyter notebook notebooks/KPIs_real_data.ipynb
