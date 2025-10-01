@@ -124,7 +124,7 @@ Complete code implementation for KPI calculation and visualization:
 ### 3. **Database Architecture** 🏗️
 Professional database structure for production environments:
 
-![Database Schema](src/DBv2.png)
+![Database Schema](src/_DC_Processe.png)
 
 #### Architecture Highlights:
 - **36 specialized tables** for different production aspects

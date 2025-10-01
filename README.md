@@ -124,7 +124,7 @@ Vollständige Code-Implementierung für KPI-Berechnung und Visualisierung:
 ### 3. **Datenbankarchitektur** 
 Professionelle Datenbankstruktur für Produktionsumgebungen:
 
-![Database Schema](src/DBv2.png)
+![Database Schema](src/_DC_Processe.png)
 
 #### Architektur-Highlights:
 - **36 spezialisierte Tabellen** für verschiedene Produktionsaspekte
