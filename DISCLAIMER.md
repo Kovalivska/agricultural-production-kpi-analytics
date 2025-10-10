@@ -49,7 +49,6 @@ Customization, integration, validation with real data, expert input, testing, tr
 
 Svitlana Kovalivska
 Email: kovalivska@gmail.com
-LinkedIn: https://www.linkedin.com/
 GitHub: https://github.com/Kovalivska
 
 Last updated: October 2025

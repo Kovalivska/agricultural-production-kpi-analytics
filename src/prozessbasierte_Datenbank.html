@@ -1024,5 +1024,156 @@
     <footer class="text-center py-3">
     <p class="mb-0">Production Monitoring © 2025 | Demo-Dashboard für Produktionsprozesse</p>
 </footer>
+
+    <!-- Added: Bootstrap JS bundle for tabs + custom script to render charts and wire interactions -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+    (function(){
+        // Update last updated timestamp
+        const lastUpdatedEl = document.getElementById('last-updated');
+        if (lastUpdatedEl) {
+            const now = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            lastUpdatedEl.textContent = `${pad(now.getDate())}.${pad(now.getMonth()+1)}.${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+
+        // Helper to store charts and prevent duplicates
+        const charts = {};
+        function ensureChart(id, config){
+            const canvas = document.getElementById(id);
+            if (!canvas) return;
+            if (charts[id]) return charts[id];
+            charts[id] = new Chart(canvas.getContext('2d'), config);
+            return charts[id];
+        }
+
+        // Common palettes
+        const colors = {
+            blue: '#3B82F6', blueFill: 'rgba(59, 130, 246, 0.15)',
+            green: '#10B981', greenFill: 'rgba(16, 185, 129, 0.15)',
+            amber: '#F59E0B', amberFill: 'rgba(245, 158, 11, 0.15)',
+            red: '#EF4444', redFill: 'rgba(239, 68, 68, 0.15)'
+        };
+
+        // Simulated datasets
+        const hours = Array.from({length: 12}, (_,i) => `${(8+i).toString().padStart(2,'0')}:00`); // 08:00-19:00
+        const weekDays = ['Mo','Di','Mi','Do','Fr','Sa','So'];
+        const monthDays = Array.from({length: 30}, (_,i)=> i+1);
+        const months = ['Jan','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+
+        function initDayCharts(){
+            ensureChart('qualityChartDay', {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [
+                        { label: 'Qualitätskonformität %', data: hours.map((_,i)=> 94 + Math.sin(i/2)*3), borderColor: colors.green, backgroundColor: colors.greenFill, fill: true, tension: 0.3 },
+                        { label: 'Ausschuss %', data: hours.map((_,i)=> 9 + Math.cos(i/2)*1.5), borderColor: colors.red, backgroundColor: colors.redFill, fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            ensureChart('performanceChartDay', {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [
+                        { label: 'Auslastung %', data: hours.map((_,i)=> 80 + (i%5)-2), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 },
+                        { label: 'Stillstand %', data: hours.map((_,i)=> 20 - (i%4)), borderColor: colors.amber, backgroundColor: colors.amberFill, fill: true, tension: 0.3 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            ensureChart('costChartDay', {
+                type: 'bar',
+                data: {
+                    labels: ['Personal','Energie','Verpackung','Sonstiges'],
+                    datasets: [{ label: 'Kosten €', data: [350,120,200,51], backgroundColor: [colors.blue, colors.amber, colors.green, colors.red] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            ensureChart('productivityChartDay', {
+                type: 'line',
+                data: {
+                    labels: hours,
+                    datasets: [ { label: 'kg/Stunde', data: hours.map((_,i)=> 110 + Math.round(Math.sin(i/3)*15)), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 } ]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        }
+
+        function initWeekCharts(){
+            ensureChart('qualityChartWeek', {
+                type: 'line',
+                data: {
+                    labels: weekDays,
+                    datasets: [
+                        { label: 'Qualitätskonformität %', data: [96,96.5,97,96.8,96.9,96.2,96.5], borderColor: colors.green, backgroundColor: colors.greenFill, fill: true, tension: 0.3 },
+                        { label: 'Ausschuss %', data: [11.2,10.8,10.5,11.0,11.4,11.6,10.9], borderColor: colors.red, backgroundColor: colors.redFill, fill: true, tension: 0.3 }
+                    ]
+                }, options: { responsive: true, maintainAspectRatio: false }
+            });
+
+            ensureChart('performanceChartWeek', {
+                type: 'line', data: { labels: weekDays, datasets: [ { label: 'OEE %', data: [76,77,75,78,79,77,76], borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            ensureChart('costChartWeek', { type: 'bar', data: { labels: ['Personal','Energie','Verpackung','Sonstiges'], datasets: [{ label: 'Kosten €', data: [2450,840,1400,290], backgroundColor: [colors.blue, colors.amber, colors.green, colors.red] }] }, options: { responsive: true, maintainAspectRatio: false } });
+
+            ensureChart('productivityChartWeek', { type: 'line', data: { labels: weekDays, datasets: [{ label: 'kg/Stunde', data: [118,120,122,125,123,121,119], borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
+        function initMonthCharts(){
+            ensureChart('qualityChartMonth', {
+                type: 'line', data: { labels: monthDays, datasets: [ { label: 'Qualitätskonformität %', data: monthDays.map((d)=> 96.5 + Math.sin(d/5)*0.8), borderColor: colors.green, backgroundColor: colors.greenFill, fill: true, tension: 0.3 }, { label: 'Ausschuss %', data: monthDays.map(d=> 11 + Math.cos(d/6)*0.7), borderColor: colors.red, backgroundColor: colors.redFill, fill: true, tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false }
+            });
+            ensureChart('performanceChartMonth', { type: 'line', data: { labels: monthDays, datasets: [{ label: 'OEE %', data: monthDays.map(d=> 77 + Math.sin(d/6)*1.5), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            ensureChart('costChartMonth', { type: 'bar', data: { labels: ['Personal','Energie','Verpackung','Sonstiges'], datasets: [{ label: 'Kosten €', data: [9800,3360,5600,1390], backgroundColor: [colors.blue, colors.amber, colors.green, colors.red] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            ensureChart('productivityChartMonth', { type: 'line', data: { labels: monthDays, datasets: [{ label: 'kg/Stunde', data: monthDays.map(d=> 120 + Math.sin(d/4)*6), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
+        function initYearCharts(){
+            ensureChart('qualityChartYear', { type: 'line', data: { labels: months, datasets: [ { label: 'Qualitätskonformität %', data: months.map((_,i)=> 97 + Math.sin(i/3)), borderColor: colors.green, backgroundColor: colors.greenFill, fill: true, tension: 0.3 }, { label: 'Ausschuss %', data: months.map((_,i)=> 11 + Math.cos(i/3)), borderColor: colors.red, backgroundColor: colors.redFill, fill: true, tension: 0.3 } ] }, options: { responsive: true, maintainAspectRatio: false } });
+            ensureChart('performanceChartYear', { type: 'line', data: { labels: months, datasets: [{ label: 'OEE %', data: months.map((_,i)=> 77 + Math.sin(i/2)), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            ensureChart('costChartYear', { type: 'bar', data: { labels: ['Personal','Energie','Verpackung','Sonstiges'], datasets: [{ label: 'Kosten €', data: [117600,40320,67200,20680], backgroundColor: [colors.blue, colors.amber, colors.green, colors.red] }] }, options: { responsive: true, maintainAspectRatio: false } });
+            ensureChart('productivityChartYear', { type: 'line', data: { labels: months, datasets: [{ label: 'kg/Stunde', data: months.map((_,i)=> 120 + Math.cos(i/3)*4), borderColor: colors.blue, backgroundColor: colors.blueFill, fill: true, tension: 0.3 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        }
+
+        // Initialize default (day) charts on load
+        initDayCharts();
+
+        // Wire Bootstrap tab events to init charts lazily
+        const tabElList = document.querySelectorAll('button[data-bs-toggle="tab"]');
+        tabElList.forEach(tabEl => {
+            tabEl.addEventListener('shown.bs.tab', function (event) {
+                const target = event.target.getAttribute('data-bs-target');
+                if (target === '#day') initDayCharts();
+                if (target === '#week') initWeekCharts();
+                if (target === '#month') initMonthCharts();
+                if (target === '#year') initYearCharts();
+                // Sync select with active tab
+                const sel = document.getElementById('time-period');
+                if (sel) {
+                    sel.value = target.replace('#','');
+                }
+            });
+        });
+
+        // Period select controls tabs
+        const periodSelect = document.getElementById('time-period');
+        if (periodSelect) {
+            periodSelect.addEventListener('change', (e) => {
+                const value = e.target.value; // 'day'|'week'|'month'|'year'
+                const btn = document.querySelector(`button[data-bs-target="#${value}"]`);
+                if (btn) {
+                    const tab = new bootstrap.Tab(btn);
+                    tab.show();
+                }
+            });
+        }
+    })();
+    </script>
 </body>
 </html>
