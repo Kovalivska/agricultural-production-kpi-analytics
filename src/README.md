@@ -1,6 +1,6 @@
 # Source Code Verzeichnis - Systemarchitektur und Implementierung
 
-Dieses Verzeichnis enthält die vollständige Systemarchitektur, Datenbankimplementierung und Visualisierungskomponenten für das Agricultural Production KPI Analytics System. Die hier befindlichen Artefakte repräsentieren die technische Umsetzung der in den Notebooks entwickelten Algorithmen und Analysen in ein produktionsreifes System.
+Dieses Verzeichnis enthält die vollständige Systemarchitektur, Datenbankimplementierung und Visualisierungskomponenten für das Production KPI Analytics System. Die hier befindlichen Artefakte repräsentieren die technische Umsetzung der in den Notebooks entwickelten Algorithmen und Analysen in ein produktionsreifes System.
 
 ## Architektur-Übersicht
 
@@ -55,8 +55,8 @@ Das src-Verzeichnis implementiert eine **modulare Drei-Schichten-Architektur**:
 - **Accessibility**: WCAG-konforme Barrierefreiheit
 - **Performance**: Optimierte Ladezeiten und Rendering
 
-### 3. **prozessbasierte_Datenbank.html** - VeggiePro Produktions-Dashboard
-**Zweck**: Spezialisiertes Dashboard für prozessbasierte Produktionsanalyse
+### 3. **prozessbasierte_Datenbank.html** - Produktions-Dashboard (Demo)
+**Zweck**: Dashboard für prozessbasierte Produktionsanalyse
 - **Technische Architektur**:
   - **CSS-Framework**: Bootstrap 5.3 für konsistente UI-Komponenten
   - **Icon-System**: Font Awesome 6.4 für einheitliche Symbolik
@@ -77,7 +77,7 @@ Das src-Verzeichnis implementiert eine **modulare Drei-Schichten-Architektur**:
   - Datentyp-Spezifikationen und Feldattribute
   - Normalisierungsgrad und Performance-Optimierungen
 
-### 5. **Datenbankarchitektur_Gemüseverarbeitungsbetrieb.docx** - Technische Spezifikation
+### 5. **Datenbankarchitektur_Produktionsbetrieb.docx** - Technische Spezifikation
 **Zweck**: Umfassende Dokumentation der Datenbankarchitektur
 - **Dokumentationsinhalt**:
   - Anforderungsanalyse und Use-Case-Definitionen

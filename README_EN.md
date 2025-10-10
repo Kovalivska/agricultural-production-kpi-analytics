@@ -12,7 +12,7 @@
 [![Made in Germany](https://img.shields.io/badge/Made%20in-Germany-black.svg?style=flat&logo=germany&logoColor=white)](https://github.com/Kovalivska/agricultural-production-kpi-analytics)
 [![Data Coffee GmbH](https://img.shields.io/badge/Developed%20at-Data%20Coffee%20GmbH-blue.svg?style=flat&logo=coffee&logoColor=white)](https://datacoffee.de)
 
-**Intelligent KPI Analytics for Vegetable Processing | 40+ KPIs | Production-Ready**
+**Intelligent KPI Analytics for Production Processes | 40+ KPIs | Production-Ready**
 
 [ Documentation](#-table-of-contents) • [ Quick Start](#-getting-started) • [ Dashboards](#4-dashboard-prototypes-) • [ License](LICENSE)
 
@@ -36,7 +36,7 @@
   - [Phase 3: Grafana & InfluxDB Integration](#phase-3-grafana--influxdb-integration)
   - [Phase 4: Production Deployment](#phase-4-production-deployment)
 - [💼 Business Value and Scalability](#-business-value-and-scalability)
-  - [💰 ROI for Vegetable Processing Companies](#immediate-roi-for-vegetable-processing-companies)
+  - [💰 ROI for Manufacturing Facilities](#immediate-roi-for-manufacturing-facilities)
   - [🏭 Industry Scalability](#industry-scalability)
   - [🎯 Market Potential](#market-potential)
 - [🔬 Technical Innovations](#-technical-innovations)
@@ -79,19 +79,8 @@ jupyter notebook notebooks/KPIs_real_data.ipynb
 open src/New_DBv1_complete.html
 ```
 
-###  **MAIN ANALYSIS: KPIs_real_data.ipynb**
-> **The most important document of this project** - 139 cells with complete implementation of all 42 KPIs
-
-📊 **Implemented KPI Categories:**
-- **Operational Control** (15 KPIs): Fill times, deviations, container management
-- **Production Efficiency** (12 KPIs): Throughput, productivity, time management  
-- **Quality Control** (8 KPIs): Weight distribution, sorting quality, error detection
-- **Cost Analysis** (7 KPIs): Cost per piece/kg, personnel costs, ROI calculation
-
-**💡 Direct link to Main Notebook:** [notebooks/KPIs_real_data.ipynb](notebooks/KPIs_real_data.ipynb)
-
 ###  Dashboard Links
-- **🏭 VeggiePro Dashboard**: [src/prozessbasierte_Datenbank.html](src/prozessbasierte_Datenbank.html)
+- **🏭 Production Dashboard (Demo)**: [src/prozessbasierte_Datenbank.html](src/prozessbasierte_Datenbank.html)
 - **📈 Analytics Dashboard**: [src/New_DBv1_complete.html](src/New_DBv1_complete.html)
 - **🗄️ Database Schema**: [src/DBv2.png](src/DBv2.png)
 
@@ -99,7 +88,7 @@ open src/New_DBv1_complete.html
 
 ##  Project Overview
 
-This project represents a comprehensive **KPI Analytics System for Agricultural Production**, developed during an internship at **Data Coffee GmbH** (June 2025 - September 2025). The system implements over **40 Key Performance Indicators** for optimizing vegetable processing with focus on signal processing, time series analysis, and data-driven decision making.
+This project presents a comprehensive **KPI analytics system for production environments**, developed during a **Data Coffee GmbH** internship (June–September 2025). The system implements over **40 KPIs** to optimize manual and semi-automated production processes, focusing on signal processing, time-series analysis, and data-driven decision-making.
 
 ##  Main Project Results
 
@@ -203,58 +192,62 @@ Professional database structure for production environments:
 ### 4. **Dashboard Prototypes** 📈
 Interactive web dashboards for different time levels:
 
-#### **VeggiePro Production Dashboard:**
+#### **Production Dashboard (Demo):**
 
 **Dashboard Features:**
-- **Real-time Monitoring** of shift performance
-- **Interactive KPI Gauges** for immediate status overview
-- **Workflow Visualization** for process steps
-- **Quality Control Interface** for manual inputs
-- **Shift Management** with personnel assignment
+- **Real-time monitoring** of shift performance
+- **Interactive KPI gauges** for instant status
+- **Workflow visualization** for process steps
+- **Quality control interface** for manual entries
+- **Shift management** with staffing
 
-#### **Complete Analytics Dashboard:**
-Comprehensive dashboard with Tailwind CSS for advanced analytics:
+#### **Full Analytics Dashboard:**
+Comprehensive dashboard with Tailwind CSS for extended analysis:
+
 
 **Advanced Features:**
-- **Multi-Tab Navigation**: Day/Week/Month/Year views
-- **Chart.js Integration** for professional data visualization
-- **Responsive Design** for Desktop and Mobile
-- **Export Functions** for PDF/Excel reports
-- **Filter System** for detailed data analysis
+- **Multi-tab navigation**: Day/Week/Month/Year
+- **Chart.js integration** for professional visualizations
+- **Responsive design** for desktop and mobile
+- **Export functions** for PDF/Excel reports
+- **Filter system** for detailed analysis
 
-#### **Time-level-specific Dashboards:**
+#### **Time-horizon specific dashboards:**
 
 **Daily Dashboard:**
-- **Cross-shift Monitoring** (Morning/Late/Night)
-- **Real-time Machine Status** and alarms
-- **Production Progress** vs. daily targets
-- **Quality Metrics** for immediate corrective actions
+- **Cross-shift monitoring** (early/late/night)
+- **Real-time machine status** and alerts
+- **Production progress** vs. daily targets
+- **Quality indicators** for immediate action
 
-![VeggiePro Dashboard](src/Dashboard_Tag.png)
+![Production Dashboard](src/Dashboard_Tag.png)
+
 
 **Weekly Dashboard:**
-- **Trend Analyses** and capacity planning
-- **Comparative Analyses** between shifts and days
-- **Productivity Development** with statistical indicators
-- **Resource Utilization** and optimization potential
+- **Trend analysis** and capacity planning
+- **Comparisons** across shifts and days
+- **Productivity development** with statistical indicators
+- **Resource utilization** and optimization
 
-![VeggiePro Dashboard](src/Dashboard_Woche.png)
+![Production Dashboard](src/Dashboard_Woche.png)
+
 
 **Monthly Dashboard:**
-- **Strategic KPI Overview** for management
-- **Cost-Benefit Analyses** and profitability metrics
-- **Forecasting** and budget planning
-- **Benchmark Comparisons** with previous months
+- **Strategic KPI overview** for management
+- **Cost-benefit analysis** and profitability metrics
+- **Forecasting** and budgeting
+- **Benchmarking** vs. previous months
 
-![VeggiePro Dashboard](src/Dashboard_Monat.png)
+![Production Dashboard](src/Dashboard_Monat.png)
+
 
 **Yearly Dashboard:**
-- **Long-term Trends** and strategic development
-- **ROI Calculations** and investment planning
-- **Seasonality Analyses** for production optimization
-- **Compliance Reporting** for regulatory requirements
+- **Long-term trends** and strategy
+- **ROI calculations** and investment planning
+- **Seasonality analysis** for optimization
+- **Compliance reporting** for regulations
 
-![VeggiePro Dashboard](src/Dashboard_Jahr.png)
+![Production Dashboard](src/Dashboard_Jahr.png)
 
 ## 🚀 Next Development Steps
 
@@ -277,68 +270,23 @@ Comprehensive dashboard with Tailwind CSS for advanced analytics:
 
 ## 💼 Business Value and Scalability
 
-### **Immediate ROI for Vegetable Processing Companies:**
+###  Immediate ROI for Manufacturing Facilities
 
-#### **Cost Savings:**
-- **15-25% Reduction** of production losses through precise weight control
-- **20-30% Improvement** in machine utilization through optimized cycle times
-- **10-15% Reduction** in personnel costs through automated quality control
+####  Cost Savings
+- **15–25% potential reduction** in production losses through early detection
+- **20–30% potential improvement** in equipment utilization via optimized cycles
+- **10–15% potential reduction** in quality control costs via automated data collection
 
-#### **Quality Improvements:**
-- **95%+ Measurement Accuracy** for weight and quality controls
-- **Sub-second Response Times** for critical process monitoring
-- **Complete Traceability** for compliance and quality management
+####  Quality Improvements
+- **95%+ calculation accuracy** on test datasets
+- **Sub-second response** for critical alerts
+- **Full traceability** for compliance and quality management
 
-### **Industry Scalability:**
+---
 
-#### **Multi-Site Deployment:**
-```
-Scaling Model:
-├── Single Operation (1-5 Production Lines)
-│   ├── Local SQLite Installation
-│   ├── Basic Dashboard Suite
-│   └── Standard KPI Set (40+ Metrics)
-│
-├── Medium Enterprise (5-20 Lines)
-│   ├── PostgreSQL Cluster
-│   ├── Grafana Enterprise Dashboards
-│   └── Advanced Analytics (ML Integration)
-│
-└── Large Corporation (20+ Sites)
-    ├── Cloud-native InfluxDB Cluster
-    ├── Kubernetes Orchestration
-    └── Corporation-wide KPI Standardization
-```
+## ⚠️ Important Disclaimer
 
-#### **Industry-specific Adaptations:**
-
-**🥬 Leafy Vegetable Processing:**
-- Specialized weight curves for salads, cabbage, spinach
-- Quality control for freshness parameters
-- Optimized packaging cycles
-
-**🥕 Root Vegetable Processing:**
-- Adapted algorithms for carrots, beets, potatoes
-- Peel thickness analyses
-- Sorting quality by size classes
-
-**🍅 Fruit Vegetable Processing:**
-- Ripeness detection for tomatoes, peppers
-- Pressure sensitivity monitoring
-- Shelf life predictions
-
-### **Market Potential:**
-
-#### **Target Groups:**
-- **Primary Target**: 2,500+ vegetable processing companies in DACH region
-- **Secondary Target**: 15,000+ European agricultural operations with processing facilities
-- **Expansion**: 50,000+ global candidates in developed markets
-
-#### **Business Model Options:**
-1. **SaaS Licensing**: Monthly subscriptions per production line
-2. **On-Premise Licenses**: One-time implementation fees
-3. **Consulting Services**: Customized implementation and training
-4. **Data Analytics Services**: Advanced analyses and benchmarking
+This repository showcases a research prototype (June–September 2025). Examples are generic; real client data has been removed or anonymized. Performance figures are presented as potential outcomes based on industry benchmarks and are not guaranteed. Details: [DISCLAIMER.md](DISCLAIMER.md).
 
 ## 🔬 Technical Innovations
 
@@ -461,28 +409,26 @@ Scaling Model:
 
 ## 📊 Project Structure
 
-The repository is organized as follows:
+Target structure (thinned, generic):
 
 ```
-Agricultural_KPI_Analytics/
-├── notebooks/              # Jupyter Notebooks for KPI development
-│   ├── KPIs_real_data.ipynb           # Main analysis (139 cells)
-│   ├── JSON__into_SQLite_DB.ipynb     # DB integration (79 cells)
-│   ├── Json_into_csv_and_db_eda.ipynb # EDA and conversion
-│   └── JSON_in_SQLite_25_06.ipynb     # Extended DB operations
-├── src/                     # Production system implementation
-│   ├── normalized_production_data_full_schema.db  # SQLite database
-│   ├── prozessbasierte_Datenbank.html            # VeggiePro Dashboard
-│   ├── New_DBv1_complete.html                    # Analytics Dashboard
-│   ├── DBv2.png                                  # DB architecture
-│   └── Datenbankarchitektur_Gemüseverarbeitungsbetrieb.docx
-├── research/                # Research materials and specifications
-│   ├── 20250611_KPIs_Pyramiden (Tag+Woche)_komADI.xlsx
-│   ├── Data_Dictionary_KG_Auftraege.xlsx
-│   └── PROJEKT_ „Digitale Kohlproduktion".docx
-└── data/                    # Anonymized sample data
-    ├── weight_sensor_agricultural_data.csv
-    └── processed_data_for_sql.csv
+Agricultural_Production_KPI_Analytics/
+├── src/                      # Production system implementation
+│   ├── prozessbasierte_Datenbank.html     # Production dashboard (demo)
+│   ├── New_DBv1_complete.html             # Analytics dashboard
+│   ├── DBv2.png                           # DB architecture (image)
+│   └── (optional) normalized_production_data_full_schema.db
+├── docs/
+│   └── METHODOLOGY.md         # Methodology (generic)
+├── data/
+│   └── sample_production_data.csv  # Synthetic sample data
+├── notebooks/
+│   └── sample_analysis.ipynb   # Demo with synthetic data
+├── generate_sample_data.py
+├── DISCLAIMER.md
+├── README.md
+├── README_EN.md
+└── .gitignore
 ```
 
 ## 🔍 Methodological Innovations

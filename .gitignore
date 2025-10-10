@@ -42,7 +42,8 @@ coverage.xml
 .pytest_cache/
 
 # Jupyter Notebook
-.ipynb_checkpoints
+.ipynb_checkpoints/
+*-checkpoint.ipynb
 
 # IPython
 profile_default/
@@ -50,12 +51,6 @@ ipython_config.py
 
 # pyenv
 .python-version
-
-# celery beat schedule file
-celerybeat-schedule
-
-# SageMath parsed files
-*.sage.py
 
 # Environments
 .env
@@ -65,21 +60,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-
-# Spyder project settings
-.spyderproject
-.spyproject
-
-# Rope project settings
-.ropeproject
-
-# mkdocs documentation
-/site
-
-# mypy
-.mypy_cache/
-.dmypy.json
-dmypy.json
 
 # IDEs
 .vscode/
@@ -98,13 +78,13 @@ ehthumbs.db
 Thumbs.db
 
 # Logs
-logs
+logs/
 *.log
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
 
 # Database
+*.db
+*.sqlite
+*.sqlite3
 *.db-journal
 *.sqlite3-journal
 
@@ -114,7 +94,35 @@ yarn-error.log*
 *.bak
 *.backup
 
-# Large data files (optional - uncomment if needed)
-# *.csv
-# *.xlsx
-# *.json
+# ============================================
+# CLIENT DATA - NEVER COMMIT
+# ============================================
+data/real_*
+data/client_*
+data/*kohl*
+data/*cabbage*
+data/*gemüse*
+data/*gemuese*
+data/*_2025_production*
+data/*mustermann*
+
+results/
+reports/
+output/
+
+# Config & secrets
+config/*_production*
+config/client_*
+config/*_secret*
+*api_key*
+*secret*
+*password*
+
+# Large files
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Keep only sample data
+!data/sample_production_data.csv
